@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Meteor-mcrypt by AntonLydike</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Meteor-mcrypt</h1>
+      <h2 class="project-tagline">A meteor package to encrypt users data with user-specific keys for later use!</h2>
+      <a href="https://github.com/AntonLydike/meteor-mcrypt" class="btn">View on GitHub</a>
+      <a href="https://github.com/AntonLydike/meteor-mcrypt/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/AntonLydike/meteor-mcrypt/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="meteor-mcrypt" class="anchor" href="#meteor-mcrypt" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Meteor mcrypt</h1>
+
+<h3>
+<a id="table-of-contents" class="anchor" href="#table-of-contents" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Table of contents:</h3>
+
+<ol>
+<li><a href="#what-is-this">What is this</a></li>
+<li>
+<a href="#api">API</a>
+
+<ol>
+<li><a href="#configuresettings">configure(settings)</a></li>
+<li><a href="#encryptcleartext-userid-salt-context">encrypt(cleartext, userId, [salt, [context]])</a></li>
+<li><a href="#decryptciphertext-userid-salt-context">decrypt(ciphertext, userId, [salt, [context]])</a></li>
+<li><a href="#generatesaltlength">generateSalt([length])</a></li>
+<li><a href="#mcrypterrorcode-reason-data">McryptError(code, reason, [data])</a></li>
+</ol>
+</li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#tests">Tests</a></li>
+<li><a href="#license">License</a></li>
+</ol>
+
+<h3>
+<a id="what-is-this" class="anchor" href="#what-is-this" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is this?</h3>
+
+<p>Encrypt important data in your DB for later use. This uses the <a href="https://nodejs.org/api/crypto.html">Node.js crypto</a> library.</p>
+
+<p>Each users data will be encrypted with a seperate key to make decryption harder in case of a data breach. The user-specific key (user-key) is derived from the application-key (app-key) plus a user-specific salt per PBKDF2.</p>
+
+<p><strong>IMPORTANT:</strong> This should NOT be used to encrypt passwords for your own login system. Often times, a <a href="https://nodejs.org/api/crypto.html#crypto_class_hash">simple hashing algorithm</a> will serve you better. Especially in terms of security!</p>
+
+<p>To install the package, run: <code>meteor add antonly:mcrypt</code>.</p>
+
+<h3>
+<a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h3>
+
+<p>Import it like this: <code>import mcrypt from 'meteor/antonly:mcrypt'</code>.</p>
+
+<h4>
+<a id="configuresettings" class="anchor" href="#configuresettings" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>configure(settings)</h4>
+
+<p>Configure the package to exactly fit your needs</p>
+
+<p><strong>default settings:</strong></p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">mcrypt</span>.<span class="pl-en">configure</span>({
+  <span class="pl-en">getUserSalt</span>(<span class="pl-smi">uid</span>, <span class="pl-smi">context</span>) {
+    <span class="pl-c">// example method for getting the salt from the user db</span>
+    <span class="pl-k">const</span> <span class="pl-c1">usr</span> <span class="pl-k">=</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">users</span>.<span class="pl-en">findOne</span>(uid);
+
+    <span class="pl-k">if</span> (<span class="pl-k">!</span>usr <span class="pl-k">||</span> <span class="pl-k">!</span><span class="pl-smi">usr</span>.<span class="pl-smi">secret_key_storage</span> <span class="pl-k">||</span> <span class="pl-k">!</span><span class="pl-smi">usr</span>.<span class="pl-smi">secret_key_storage</span>.<span class="pl-smi">salt</span>) {
+      <span class="pl-k">throw</span> <span class="pl-k">new</span> <span class="pl-en">mcrypt.Error</span>(
+        <span class="pl-s"><span class="pl-pds">'</span>no-salt-given<span class="pl-pds">'</span></span>, 
+        <span class="pl-s"><span class="pl-pds">`</span>Salt for user with id '<span class="pl-s1"><span class="pl-pse">${</span>userId<span class="pl-pse">}</span></span>' was not found in the db.<span class="pl-pds">`</span></span>, 
+        {userId, context}
+      );
+    }
+
+    <span class="pl-k">return</span> <span class="pl-smi">usr</span>.<span class="pl-smi">secret_key_storage</span>.<span class="pl-smi">salt</span>;
+  },
+  <span class="pl-en">getAppKey</span>(<span class="pl-smi">context</span>)  {
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_ENCRYPTION_KEY</span>;
+  },
+  <span class="pl-en">getUserKeyLen</span>(<span class="pl-smi">context</span>)  {
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_USER_KEY_LENGTH</span>;
+  },
+  <span class="pl-en">getRounds</span>(<span class="pl-smi">context</span>)  {
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PBKDF2_ROUNDS</span>;
+  },
+  <span class="pl-en">getDigest</span>(<span class="pl-smi">context</span>)  {
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PBKDF2_DIGEST</span>;
+  },
+  <span class="pl-en">getAlgorithm</span>(<span class="pl-smi">context</span>)  {
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_ALGORITHM</span>;
+  },
+  <span class="pl-en">throwDecryptError</span>(<span class="pl-smi">context</span>) {
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_THROW_DECRYPT_ERR</span>;
+  },
+  <span class="pl-en">getSaltLen</span>()  {
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_SALT_LENGTH</span>;
+  }
+})</pre></div>
+
+<ol>
+<li>
+<code>getUserSalt(uid, context)</code> a function to get the users salt. (in this example it is taken from the Meteor.users db)</li>
+<li>
+<code>getAppKey(context)</code> this function return the app-key. It is recommended that you don't change the following functions but rather add the following lines to your <a href="https://themeteorchef.com/snippets/making-use-of-settings-json/">settings.json</a>. All the following functions are just wrappers for the <code>Meteor.settings</code> variables.</li>
+</ol>
+
+<p>The <code>context</code> wil be passed along from a <code>decrypt</code> or <code>encrypt</code> call to all settings methods (except <code>getSaltLen</code>) and can help you customize your values to your specifc needs.</p>
+
+<p><strong>settings.json:</strong></p>
+
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_ENCRYPTION_KEY<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>*some long encryption key*<span class="pl-pds">"</span></span>,
+  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_SALT_LENGTH<span class="pl-pds">"</span></span>: <span class="pl-c1">32</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_USER_KEY_LENGTH<span class="pl-pds">"</span></span>: <span class="pl-c1">32</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PBKDF2_ROUNDS<span class="pl-pds">"</span></span>: <span class="pl-c1">100</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PBKDF2_DIGEST<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>sha512<span class="pl-pds">"</span></span>,
+  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_ALGORITHM<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>aes-256-ctr<span class="pl-pds">"</span></span>,
+  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_THROW_DECRYPT_ERR<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>
+}</pre></div>
+
+<p>In order to be able to use these settings in your meteor app, you will have to add the settings parameter to your <code>meteor</code> command: <code>meteor --settings development.json</code></p>
+
+<p><strong>What each entry does:</strong></p>
+
+<ol>
+<li>
+<code>ENCRYPT_PASSW_ENCRYPTION_KEY</code> Your secret key (aka. app-key). This key should be impossible to guess, so chose a big one.</li>
+<li>
+<code>ENCRYPT_PASSW_SALT_LENGTH</code> The length (in bytes) of a standard 'salt' to derive the user-specific key</li>
+<li>
+<code>ENCRYPT_PASSW_USER_KEY_LENGTH</code> The length (in bytes) of the key, derived from PBKDF2(app-key, salt) that is used to encrypt the data</li>
+<li>
+<code>ENCRYPT_PBKDF2_ROUNDS</code> and <code>ENCRYPT_PBKDF2_DIGEST</code> correspond to their PBKDF2 parameters (more <a href="https://nodejs.org/api/crypto.html#crypto_crypto_pbkdf2sync_password_salt_iterations_keylen_digest">here</a>)</li>
+<li>
+<code>ENCRYPT_PASSW_ALGORITHM</code> is the algorithm used to encrypt the data (the algorithm field of <a href="https://nodejs.org/api/crypto.html#crypto_class_cipher">crypto.createCipher</a>)</li>
+<li>
+<code>ENCRYPT_THROW_DECRYPT_ERR</code> Some algorithms will throw errors when trying to decipher with the wron key. If this is set to false, the error will be catched and an McryptError will be returned instead.</li>
+</ol>
+
+<p>Sidenote: Of course you have to use your own parameters. These are just the development settings. You will have to choose your own parameters, depending on the importance of your data. (PBKDF2_ROUNDS should be chosen to fit your host system. I've read <a href="http://security.stackexchange.com/a/3993">somewhere</a> that a hash should take <strong>at least</strong> 241 milliseconds)</p>
+
+<p>If you want to set your own values, <code>mcrypt.configure</code> expects an object with <strong>functions or values</strong> to replace the standard ones:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">mcrypt</span>.<span class="pl-en">configure</span>({
+  <span class="pl-en">getUserSalt</span>(<span class="pl-smi">uid</span>, <span class="pl-smi">context</span>) {
+    <span class="pl-k">let</span> db <span class="pl-k">=</span> AdminsDB;
+
+    <span class="pl-k">if</span> (context <span class="pl-k">==</span> <span class="pl-s"><span class="pl-pds">'</span>clients<span class="pl-pds">'</span></span>) {
+      db <span class="pl-k">=</span> ClientsDB;
+    }
+
+    <span class="pl-k">return</span> <span class="pl-smi">db</span>.<span class="pl-c1">find</span>(uid).<span class="pl-smi">secret</span>.<span class="pl-smi">salt</span>;
+  },
+  getRounds<span class="pl-k">:</span> <span class="pl-c1">10e9</span>, <span class="pl-c">// 10000000000</span>
+  getSaltLen<span class="pl-k">:</span> <span class="pl-c1">64</span>
+})</pre></div>
+
+<p>(notice how you can pass functions or values)</p>
+
+<h4>
+<a id="encryptcleartext-userid-salt-context" class="anchor" href="#encryptcleartext-userid-salt-context" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>encrypt(cleartext, userId, [salt, [context]])</h4>
+
+<p>Encrypts the given cleartext. </p>
+
+<ul>
+<li>
+<code>cleartext</code> The utf-8 string to encrypt</li>
+<li>
+<code>userId</code> the ID of the user who's salt will be used</li>
+<li>
+<code>salt</code> can be passed instead of <code>userId</code> if you already got it, or just generated it. If the salt is omitted or false, the result of <code>getUserSalt(userId, context)</code> will be used as salt. The salt is used to derive the user-key from the app-key</li>
+<li>
+<code>context</code> is passed along to the <code>getUserSalt(userId, context)</code> function in the case that no salt is provided directly</li>
+</ul>
+
+<p><strong>examples</strong></p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">mcrypt</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>meteor/antonly:mcrypt<span class="pl-pds">'</span></span>;
+
+<span class="pl-k">const</span> <span class="pl-c1">cleartext</span>   <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>Cleartext 1<span class="pl-pds">'</span></span>,
+      salt        <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>Just some simple salt<span class="pl-pds">'</span></span>;
+
+<span class="pl-c">// encrypt with salt from DB</span>
+<span class="pl-k">const</span> <span class="pl-c1">ciphertext</span>  <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-c1">1</span>); 
+<span class="pl-c">// this will use the salt from user with the ID 1</span>
+
+<span class="pl-c">// encrypt with known salt</span>
+<span class="pl-k">const</span> <span class="pl-c1">ciphertext2</span> <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-c1">0</span>, salt); 
+<span class="pl-c">// the userId can be set to any arbitrary value because the salt is provided</span></pre></div>
+
+<h4>
+<a id="decryptciphertext-userid-salt-context" class="anchor" href="#decryptciphertext-userid-salt-context" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>decrypt(ciphertext, userId, [salt, [context]])</h4>
+
+<p>Decrypts given ciphertext.</p>
+
+<ul>
+<li>
+<code>ciphertext</code> the text to decrypt</li>
+<li>
+<code>userId</code> same thing as before, either you specify a userId or a salt</li>
+<li>
+<code>salt</code> and <code>context</code> see encrypt </li>
+</ul>
+
+<p>This can return a <code>bad-decrypt</code> error when <code>ENCRYPT_THROW_DECRYPT_ERR</code> is set to true. The error will look like this:</p>
+
+<div class="highlight highlight-source-js"><pre>McryptError {
+  _isError<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+  code<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>bad-decrypt<span class="pl-pds">'</span></span>,
+  reason<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>The ciphertext couldn<span class="pl-cce">\'</span>t be decrypted with the given key<span class="pl-pds">'</span></span>,
+  data<span class="pl-k">:</span> { 
+    ciphertext<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>2d27113bad83553254cd8a604282814e274ee4b08ccf57940e583f01a364b742<span class="pl-pds">'</span></span>,
+    salt<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>u/QOClVMrCOhESVa/pz0q6/plwCPVynoPMegKW3ArWw=<span class="pl-pds">'</span></span>,
+    userId<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>B<span class="pl-pds">'</span></span>,
+    context<span class="pl-k">:</span> { },
+    error<span class="pl-k">:</span> [<span class="pl-c1">Error</span><span class="pl-k">:</span> error<span class="pl-k">:</span><span class="pl-c1">06065064</span><span class="pl-k">:</span>digital envelope routines<span class="pl-k">:</span>EVP_DecryptFinal_ex<span class="pl-k">:</span>bad decrypt] 
+  } 
+}</pre></div>
+
+<p><code>data.error</code> contains the catched error.</p>
+
+<h4>
+<a id="generatesaltlength" class="anchor" href="#generatesaltlength" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>generateSalt([length])</h4>
+
+<p>Generates a random salt using <code>crypto.randomBytes</code>. If you don't specify a length (in bytes) it will use the result of <code>getSaltLen()</code>.</p>
+
+<h4>
+<a id="mcrypterrorcode-reason-data" class="anchor" href="#mcrypterrorcode-reason-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>McryptError(code, reason, [data])</h4>
+
+<p>An error object. It has the following fields:</p>
+
+<ul>
+<li>
+<code>code</code> The error code (for example <code>'no-salt-given'</code>)</li>
+<li>
+<code>reason</code> a more in-depth explanation of what went wrong</li>
+<li>
+<code>data</code> (optional) Additional data for debugging or error handling / logging</li>
+</ul>
+
+<p><strong>example from the standard <code>getUserSalt</code> method:</strong></p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">throw</span> <span class="pl-k">new</span> <span class="pl-en">mcrypt.Error</span>(
+  <span class="pl-s"><span class="pl-pds">'</span>no-salt-given<span class="pl-pds">'</span></span>, 
+  <span class="pl-s"><span class="pl-pds">`</span>Salt for user with id <span class="pl-s1"><span class="pl-pse">${</span>userId<span class="pl-pse">}</span></span> was not found in the db.<span class="pl-pds">`</span></span>, 
+  {userId, context}
+);</pre></div>
+
+<p>The error object will look something like this:</p>
+
+<div class="highlight highlight-source-js"><pre>McryptError {
+  _isError<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+  code<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>no-salt-given<span class="pl-pds">'</span></span>,
+  reason<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Salt for user with id 1 was not found in the db.<span class="pl-pds">'</span></span>,
+  data<span class="pl-k">:</span> { userId<span class="pl-k">:</span> <span class="pl-c1">1</span>, context<span class="pl-k">:</span> {} } 
+}</pre></div>
+
+<p>It also has a custom <code>toString</code> method, wich will return <code>[McryptError this.code]</code>. In this case it would be <code>[McryptError no-salt-given]</code>.</p>
+
+<h3>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>usage</h3>
+
+<p>This is the <code>mcrypt-tests.js</code> code modified slightly.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">mcrypt</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>meteor/antonly:mcrypt<span class="pl-pds">'</span></span>;
+<span class="pl-k">import</span> { <span class="pl-smi">Mongo</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>meteor/mongo<span class="pl-pds">'</span></span>;
+
+<span class="pl-k">let</span> salt, cleartext, ciphertext, tomsCleartext, annasClearText, clear2, clear3;
+
+
+<span class="pl-c">////// simple form: ///////</span>
+
+<span class="pl-c">// generate a salt</span>
+salt       <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>();
+cleartext  <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>The cake is a lie!<span class="pl-pds">'</span></span>;
+<span class="pl-c">// userId is not used since the salt is given</span>
+ciphertext <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-c1">0</span>, salt); 
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Encrypted '<span class="pl-s1"><span class="pl-pse">${</span>cleartext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' with salt '<span class="pl-s1"><span class="pl-pse">${</span>salt<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
+
+clear2     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-c1">0</span>, salt);
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>clear2<span class="pl-pse">}</span></span>' with salt '<span class="pl-s1"><span class="pl-pse">${</span>salt<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
+
+
+<span class="pl-c">////// a little more advanced: ///////</span>
+
+<span class="pl-c">// substitution for a user DB</span>
+<span class="pl-k">const</span> <span class="pl-c1">persons</span> <span class="pl-k">=</span> {
+  <span class="pl-s"><span class="pl-pds">'</span>anna<span class="pl-pds">'</span></span><span class="pl-k">:</span> {salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()},
+  <span class="pl-s"><span class="pl-pds">'</span>tom<span class="pl-pds">'</span></span><span class="pl-k">:</span> {salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()}
+}
+
+<span class="pl-c">// tell the encrypter where he can find the salts</span>
+<span class="pl-smi">mcrypt</span>.<span class="pl-en">configure</span>({
+  <span class="pl-en">getUserSalt</span>(<span class="pl-smi">user</span>, <span class="pl-smi">context</span>) {
+    <span class="pl-k">return</span> persons[user].<span class="pl-smi">salt</span>;
+  }
+})
+
+<span class="pl-c">// what anna does:</span>
+cleartext      <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>I got a cake!<span class="pl-pds">'</span></span>;
+ciphertext     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-s"><span class="pl-pds">'</span>anna<span class="pl-pds">'</span></span>);
+
+<span class="pl-c">// anna can now store the ciphertext anywhere she wants</span>
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna encrypted '<span class="pl-s1"><span class="pl-pse">${</span>cleartext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
+
+<span class="pl-c">// what tom tries:</span>
+tomsCleartext  <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>tom<span class="pl-pds">'</span></span>);
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Tom tried to decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>tomsCleartext<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
+
+<span class="pl-c">// and what anna decrypts again</span>
+annasClearText <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>anna<span class="pl-pds">'</span></span>);
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>annasClearText<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
+
+
+<span class="pl-c">////// a little more advanced: ///////</span>
+
+<span class="pl-c">// changing the settings will render all preiously created ciphertext unreadable</span>
+<span class="pl-smi">mcrypt</span>.<span class="pl-en">configure</span>({
+  getSaltLen<span class="pl-k">:</span> <span class="pl-c1">8</span>,
+  getAppKey<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>super-secret-app-key<span class="pl-pds">'</span></span>,
+  <span class="pl-en">getUserSalt</span>(<span class="pl-smi">id</span>, <span class="pl-smi">context</span>) {
+    <span class="pl-c">// search for the salt in the DB provided as context</span>
+
+    <span class="pl-k">return</span> <span class="pl-smi">context</span>.<span class="pl-en">findOne</span>(id).<span class="pl-smi">secretFields</span>.<span class="pl-smi">salt</span>;
+  },
+  getUserKeyLen<span class="pl-k">:</span> <span class="pl-c1">8</span>,
+  getRounds<span class="pl-k">:</span> <span class="pl-c1">500</span>,
+  getDigest<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>sha256<span class="pl-pds">'</span></span>,
+  getAlgorithm<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>aes192<span class="pl-pds">'</span></span>, 
+  throwDecryptError<span class="pl-k">:</span> <span class="pl-c1">false</span>
+});
+
+
+<span class="pl-c">////// realistic use: ///////</span>
+
+<span class="pl-c">// create a real DB</span>
+<span class="pl-k">const</span> <span class="pl-c1">Users</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Mongo.Collection</span>(<span class="pl-s"><span class="pl-pds">'</span>test-users<span class="pl-pds">'</span></span>);
+
+<span class="pl-c">// reset it</span>
+<span class="pl-smi">Users</span>.<span class="pl-c1">remove</span>({});
+
+<span class="pl-c">// add two users to it</span>
+<span class="pl-smi">Users</span>.<span class="pl-en">insert</span>({
+  _id<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>A<span class="pl-pds">'</span></span>, 
+  name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Anna<span class="pl-pds">'</span></span>, 
+  secretFields<span class="pl-k">:</span> {
+    salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()
+  }
+});
+<span class="pl-smi">Users</span>.<span class="pl-en">insert</span>({
+  _id<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>B<span class="pl-pds">'</span></span>, 
+  name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Tom<span class="pl-pds">'</span></span>, 
+  secretFields<span class="pl-k">:</span> {
+    salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()
+  }
+});
+
+cleartext  <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>And all the cake is gone.<span class="pl-pds">'</span></span>;
+<span class="pl-c">// if the salt is set to false, it will use the userId to get to the salt</span>
+ciphertext <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-s"><span class="pl-pds">'</span>A<span class="pl-pds">'</span></span>, <span class="pl-c1">false</span>, Users); <span class="pl-c">// &lt;- Annas ID</span>
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna encrypted '<span class="pl-s1"><span class="pl-pse">${</span>cleartext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
+
+clear2     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>B<span class="pl-pds">'</span></span>, <span class="pl-c1">false</span>, Users); <span class="pl-c">// &lt;- Toms ID</span>
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Tom decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>clear2<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
+
+clear3     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>A<span class="pl-pds">'</span></span>, <span class="pl-c1">false</span>, Users); <span class="pl-c">// &lt;- Annas ID</span>
+
+<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>clear3<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);</pre></div>
+
+<h3>
+<a id="tests" class="anchor" href="#tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tests</h3>
+
+<p>There are a couple of TinyTest tests. To run them:</p>
+
+<ol>
+<li>Install TinyTest: <code>meteor add tinytest</code>
+</li>
+<li>Run Meteor in test mode with your settings file: <code>meteor test-packages --settings settings.json</code>
+</li>
+<li>Navigate to <code>http://localhost:3000</code>
+</li>
+<li>Hopefully see all tests passing:</li>
+</ol>
+
+<p><img src="http://i.imgur.com/CSaulpQ.png" alt="http://i.imgur.com/CSaulpQ.png"></p>
+
+<h3>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h3>
+
+<p>The code for this package is licensed under the <a href="http://opensource.org/licenses/MIT">MIT License</a>.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/AntonLydike/meteor-mcrypt">Meteor-mcrypt</a> is maintained by <a href="https://github.com/AntonLydike">AntonLydike</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
