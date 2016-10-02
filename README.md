@@ -309,7 +309,7 @@ console.log(`Anna decrypted '${ciphertext}' to '${clear3}'`);
 There are a couple of TinyTest tests. To run them:
 
   1. Install TinyTest: `meteor add tinytest`
-  2. Run Meteor in test mode `meteor test-packages`
+  2. Run Meteor in test mode with your settings file: `meteor test-packages --settings settings.json`
   3. Navigate to `http://localhost:3000`
   4. Hopefully see all tests passing:
 
