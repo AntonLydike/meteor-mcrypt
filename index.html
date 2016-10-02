@@ -83,25 +83,25 @@
     <span class="pl-k">return</span> <span class="pl-smi">usr</span>.<span class="pl-smi">secret_key_storage</span>.<span class="pl-smi">salt</span>;
   },
   <span class="pl-en">getAppKey</span>(<span class="pl-smi">context</span>)  {
-    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_ENCRYPTION_KEY</span>;
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">MCRYPT_PASSW_ENCRYPTION_KEY</span>;
   },
   <span class="pl-en">getUserKeyLen</span>(<span class="pl-smi">context</span>)  {
-    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_USER_KEY_LENGTH</span>;
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">MCRYPT_PASSW_USER_KEY_LENGTH</span>;
   },
   <span class="pl-en">getRounds</span>(<span class="pl-smi">context</span>)  {
-    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PBKDF2_ROUNDS</span>;
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">MCRYPT_PBKDF2_ROUNDS</span>;
   },
   <span class="pl-en">getDigest</span>(<span class="pl-smi">context</span>)  {
-    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PBKDF2_DIGEST</span>;
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">MCRYPT_PBKDF2_DIGEST</span>;
   },
   <span class="pl-en">getAlgorithm</span>(<span class="pl-smi">context</span>)  {
-    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_ALGORITHM</span>;
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">MCRYPT_PASSW_ALGORITHM</span>;
   },
   <span class="pl-en">throwDecryptError</span>(<span class="pl-smi">context</span>) {
-    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_THROW_DECRYPT_ERR</span>;
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">MCRYPT_THROW_DECRYPT_ERR</span>;
   },
   <span class="pl-en">getSaltLen</span>()  {
-    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">ENCRYPT_PASSW_SALT_LENGTH</span>;
+    <span class="pl-k">return</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">settings</span>.<span class="pl-c1">MCRYPT_PASSW_SALT_LENGTH</span>;
   }
 })</pre></div>
 
@@ -117,13 +117,13 @@
 <p><strong>settings.json:</strong></p>
 
 <div class="highlight highlight-source-json"><pre>{
-  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_ENCRYPTION_KEY<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>*some long encryption key*<span class="pl-pds">"</span></span>,
-  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_SALT_LENGTH<span class="pl-pds">"</span></span>: <span class="pl-c1">32</span>,
-  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_USER_KEY_LENGTH<span class="pl-pds">"</span></span>: <span class="pl-c1">32</span>,
-  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PBKDF2_ROUNDS<span class="pl-pds">"</span></span>: <span class="pl-c1">100</span>,
-  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PBKDF2_DIGEST<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>sha512<span class="pl-pds">"</span></span>,
-  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_PASSW_ALGORITHM<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>aes-256-ctr<span class="pl-pds">"</span></span>,
-  <span class="pl-s"><span class="pl-pds">"</span>ENCRYPT_THROW_DECRYPT_ERR<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>
+  <span class="pl-s"><span class="pl-pds">"</span>MCRYPT_PASSW_ENCRYPTION_KEY<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>*some long encryption key*<span class="pl-pds">"</span></span>,
+  <span class="pl-s"><span class="pl-pds">"</span>MCRYPT_PASSW_SALT_LENGTH<span class="pl-pds">"</span></span>: <span class="pl-c1">32</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>MCRYPT_PASSW_USER_KEY_LENGTH<span class="pl-pds">"</span></span>: <span class="pl-c1">32</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>MCRYPT_PBKDF2_ROUNDS<span class="pl-pds">"</span></span>: <span class="pl-c1">100</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>MCRYPT_PBKDF2_DIGEST<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>sha512<span class="pl-pds">"</span></span>,
+  <span class="pl-s"><span class="pl-pds">"</span>MCRYPT_PASSW_ALGORITHM<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>aes-256-ctr<span class="pl-pds">"</span></span>,
+  <span class="pl-s"><span class="pl-pds">"</span>MCRYPT_THROW_DECRYPT_ERR<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>
 }</pre></div>
 
 <p>In order to be able to use these settings in your meteor app, you will have to add the settings parameter to your <code>meteor</code> command: <code>meteor --settings development.json</code></p>
@@ -132,17 +132,17 @@
 
 <ol>
 <li>
-<code>ENCRYPT_PASSW_ENCRYPTION_KEY</code> Your secret key (aka. app-key). This key should be impossible to guess, so chose a big one.</li>
+<code>MCRYPT_PASSW_ENCRYPTION_KEY</code> Your secret key (aka. app-key). This key should be impossible to guess, so chose a big one.</li>
 <li>
-<code>ENCRYPT_PASSW_SALT_LENGTH</code> The length (in bytes) of a standard 'salt' to derive the user-specific key</li>
+<code>MCRYPT_PASSW_SALT_LENGTH</code> The length (in bytes) of a standard 'salt' to derive the user-specific key</li>
 <li>
-<code>ENCRYPT_PASSW_USER_KEY_LENGTH</code> The length (in bytes) of the key, derived from PBKDF2(app-key, salt) that is used to encrypt the data</li>
+<code>MCRYPT_PASSW_USER_KEY_LENGTH</code> The length (in bytes) of the key, derived from PBKDF2(app-key, salt) that is used to encrypt the data</li>
 <li>
-<code>ENCRYPT_PBKDF2_ROUNDS</code> and <code>ENCRYPT_PBKDF2_DIGEST</code> correspond to their PBKDF2 parameters (more <a href="https://nodejs.org/api/crypto.html#crypto_crypto_pbkdf2sync_password_salt_iterations_keylen_digest">here</a>)</li>
+<code>MCRYPT_PBKDF2_ROUNDS</code> and <code>MCRYPT_PBKDF2_DIGEST</code> correspond to their PBKDF2 parameters (more <a href="https://nodejs.org/api/crypto.html#crypto_crypto_pbkdf2sync_password_salt_iterations_keylen_digest">here</a>)</li>
 <li>
-<code>ENCRYPT_PASSW_ALGORITHM</code> is the algorithm used to encrypt the data (the algorithm field of <a href="https://nodejs.org/api/crypto.html#crypto_class_cipher">crypto.createCipher</a>)</li>
+<code>MCRYPT_PASSW_ALGORITHM</code> is the algorithm used to encrypt the data (the algorithm field of <a href="https://nodejs.org/api/crypto.html#crypto_class_cipher">crypto.createCipher</a>)</li>
 <li>
-<code>ENCRYPT_THROW_DECRYPT_ERR</code> Some algorithms will throw errors when trying to decipher with the wron key. If this is set to false, the error will be catched and an McryptError will be returned instead.</li>
+<code>MCRYPT_THROW_DECRYPT_ERR</code> Some algorithms will throw errors when trying to decipher with the wron key. If this is set to false, the error will be catched and an McryptError will be returned instead.</li>
 </ol>
 
 <p>Sidenote: Of course you have to use your own parameters. These are just the development settings. You will have to choose your own parameters, depending on the importance of your data. (PBKDF2_ROUNDS should be chosen to fit your host system. I've read <a href="http://security.stackexchange.com/a/3993">somewhere</a> that a hash should take <strong>at least</strong> 241 milliseconds)</p>
@@ -210,7 +210,7 @@
 <code>salt</code> and <code>context</code> see encrypt </li>
 </ul>
 
-<p>This can return a <code>bad-decrypt</code> error when <code>ENCRYPT_THROW_DECRYPT_ERR</code> is set to true. The error will look like this:</p>
+<p>This can return a <code>bad-decrypt</code> error when <code>MCRYPT_THROW_DECRYPT_ERR</code> is set to true. The error will look like this:</p>
 
 <div class="highlight highlight-source-js"><pre>McryptError {
   _isError<span class="pl-k">:</span> <span class="pl-c1">true</span>,
@@ -268,119 +268,80 @@
 <h3>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>usage</h3>
 
-<p>This is the <code>mcrypt-tests.js</code> code modified slightly.</p>
+<p>This is how I (would) use this package. Your secret could be a user-specific API-key for example.</p>
 
 <div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">mcrypt</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>meteor/antonly:mcrypt<span class="pl-pds">'</span></span>;
-<span class="pl-k">import</span> { <span class="pl-smi">Mongo</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>meteor/mongo<span class="pl-pds">'</span></span>;
 
-<span class="pl-k">let</span> salt, cleartext, ciphertext, tomsCleartext, annasClearText, clear2, clear3;
-
-
-<span class="pl-c">////// simple form: ///////</span>
-
-<span class="pl-c">// generate a salt</span>
-salt       <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>();
-cleartext  <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>The cake is a lie!<span class="pl-pds">'</span></span>;
-<span class="pl-c">// userId is not used since the salt is given</span>
-ciphertext <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-c1">0</span>, salt); 
-
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Encrypted '<span class="pl-s1"><span class="pl-pse">${</span>cleartext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' with salt '<span class="pl-s1"><span class="pl-pse">${</span>salt<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
-
-clear2     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-c1">0</span>, salt);
-
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>clear2<span class="pl-pse">}</span></span>' with salt '<span class="pl-s1"><span class="pl-pse">${</span>salt<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
-
-
-<span class="pl-c">////// a little more advanced: ///////</span>
-
-<span class="pl-c">// substitution for a user DB</span>
-<span class="pl-k">const</span> <span class="pl-c1">persons</span> <span class="pl-k">=</span> {
-  <span class="pl-s"><span class="pl-pds">'</span>anna<span class="pl-pds">'</span></span><span class="pl-k">:</span> {salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()},
-  <span class="pl-s"><span class="pl-pds">'</span>tom<span class="pl-pds">'</span></span><span class="pl-k">:</span> {salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()}
-}
-
-<span class="pl-c">// tell the encrypter where he can find the salts</span>
+<span class="pl-c">// point to the right field in the DB</span>
 <span class="pl-smi">mcrypt</span>.<span class="pl-en">configure</span>({
-  <span class="pl-en">getUserSalt</span>(<span class="pl-smi">user</span>, <span class="pl-smi">context</span>) {
-    <span class="pl-k">return</span> persons[user].<span class="pl-smi">salt</span>;
+  <span class="pl-en">getUserSalt</span>(<span class="pl-smi">userId</span>) {
+    <span class="pl-k">const</span> <span class="pl-c1">usr</span> <span class="pl-k">=</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">users</span>.<span class="pl-en">findOne</span>(userId);
+
+    <span class="pl-k">if</span> (<span class="pl-k">!</span>usr <span class="pl-k">||</span> <span class="pl-k">!</span><span class="pl-smi">usr</span>.<span class="pl-smi">important</span> <span class="pl-k">||</span> <span class="pl-k">!</span><span class="pl-smi">usr</span>.<span class="pl-smi">important</span>.<span class="pl-smi">salt</span>) {
+      <span class="pl-k">throw</span> <span class="pl-k">new</span> <span class="pl-en">mcrypt.Error</span>(
+        <span class="pl-s"><span class="pl-pds">'</span>no-salt-given<span class="pl-pds">'</span></span>,
+        <span class="pl-s"><span class="pl-pds">`</span>Salt for user with id '<span class="pl-s1"><span class="pl-pse">${</span>userId<span class="pl-pse">}</span></span>' was not found in the db.<span class="pl-pds">`</span></span>,
+        {userId, context}
+      );
+    }
+
+    <span class="pl-k">return</span> <span class="pl-smi">usr</span>.<span class="pl-smi">important</span>.<span class="pl-smi">salt</span>;
   }
+});
+
+<span class="pl-c">// make sure each user has a salt</span>
+<span class="pl-smi">Accounts</span>.<span class="pl-en">onCreateUser</span>(<span class="pl-k">function</span>(<span class="pl-smi">options</span>, <span class="pl-smi">user</span>){
+  <span class="pl-smi">user</span>.<span class="pl-smi">important</span> <span class="pl-k">=</span> {
+    salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()
+  }
+
+  <span class="pl-k">return</span> user;
+});
+
+<span class="pl-c">// implement methods to get and set secrets</span>
+<span class="pl-smi">Meteor</span>.<span class="pl-en">methods</span>({
+  <span class="pl-en">setSecret</span>(<span class="pl-smi">secret</span>) {
+    <span class="pl-en">check</span>(secret, <span class="pl-c1">String</span>);
+
+    <span class="pl-k">if</span> (<span class="pl-k">!</span><span class="pl-v">this</span>.<span class="pl-smi">userId</span>) <span class="pl-k">return</span> {success<span class="pl-k">:</span><span class="pl-c1">false</span>, error<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>login-required<span class="pl-pds">'</span></span>};
+
+    <span class="pl-k">const</span> <span class="pl-c1">cipher</span> <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(secret, <span class="pl-v">this</span>.<span class="pl-smi">userId</span>);
+
+    <span class="pl-smi">Meteor</span>.<span class="pl-smi">users</span>.<span class="pl-en">update</span>(<span class="pl-v">this</span>.<span class="pl-smi">userId</span>, {
+      $set<span class="pl-k">:</span> {
+        <span class="pl-s"><span class="pl-pds">'</span>important.secret<span class="pl-pds">'</span></span><span class="pl-k">:</span> cipher
+      }
+    });
+
+    <span class="pl-k">return</span> cipher;
+  },
+  <span class="pl-en">getSecret</span>() {
+    <span class="pl-k">if</span> (<span class="pl-k">!</span><span class="pl-v">this</span>.<span class="pl-smi">userId</span>) <span class="pl-k">return</span> {success<span class="pl-k">:</span><span class="pl-c1">false</span>, error<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>login-required<span class="pl-pds">'</span></span>};
+
+    <span class="pl-k">const</span> <span class="pl-c1">cipher</span> <span class="pl-k">=</span> <span class="pl-smi">Meteor</span>.<span class="pl-smi">users</span>.<span class="pl-en">findOne</span>(<span class="pl-v">this</span>.<span class="pl-smi">userId</span>).<span class="pl-smi">important</span>.<span class="pl-smi">secret</span>;
+
+    <span class="pl-k">const</span> <span class="pl-c1">clear</span>  <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(cipher, <span class="pl-v">this</span>.<span class="pl-smi">userId</span>);
+
+    <span class="pl-k">return</span> clear;
+  }
+});
+
+
+
+<span class="pl-c">//// usage ////</span>
+
+<span class="pl-c">// on the client</span>
+<span class="pl-smi">Meteor</span>.<span class="pl-c1">call</span>(<span class="pl-s"><span class="pl-pds">"</span>setSecret<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>secret<span class="pl-pds">"</span></span>, <span class="pl-k">function</span> (<span class="pl-smi">err</span>, <span class="pl-smi">data</span>) {
+  <span class="pl-k">if</span> (data <span class="pl-k">&amp;&amp;</span> <span class="pl-smi">data</span>.<span class="pl-smi">success</span> <span class="pl-k">!==</span> <span class="pl-c1">false</span>) <span class="pl-en">alert</span>(<span class="pl-s"><span class="pl-pds">`</span>Secret saved as "<span class="pl-s1"><span class="pl-pse">${</span>data<span class="pl-pse">}</span></span>"<span class="pl-pds">`</span></span>);
 })
 
-<span class="pl-c">// what anna does:</span>
-cleartext      <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>I got a cake!<span class="pl-pds">'</span></span>;
-ciphertext     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-s"><span class="pl-pds">'</span>anna<span class="pl-pds">'</span></span>);
 
-<span class="pl-c">// anna can now store the ciphertext anywhere she wants</span>
+<span class="pl-c">// later on</span>
+<span class="pl-smi">Meteor</span>.<span class="pl-c1">call</span>(<span class="pl-s"><span class="pl-pds">"</span>getSecret<span class="pl-pds">"</span></span>, <span class="pl-k">function</span> (<span class="pl-smi">err</span>, <span class="pl-smi">data</span>) {
+  <span class="pl-k">if</span> (<span class="pl-k">!</span>err) <span class="pl-en">alert</span>(<span class="pl-s"><span class="pl-pds">`</span>Secret retrieved as "<span class="pl-s1"><span class="pl-pse">${</span>data<span class="pl-pse">}</span></span>"<span class="pl-pds">`</span></span>);
+})</pre></div>
 
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna encrypted '<span class="pl-s1"><span class="pl-pse">${</span>cleartext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
-
-<span class="pl-c">// what tom tries:</span>
-tomsCleartext  <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>tom<span class="pl-pds">'</span></span>);
-
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Tom tried to decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>tomsCleartext<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
-
-<span class="pl-c">// and what anna decrypts again</span>
-annasClearText <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>anna<span class="pl-pds">'</span></span>);
-
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>annasClearText<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
-
-
-<span class="pl-c">////// a little more advanced: ///////</span>
-
-<span class="pl-c">// changing the settings will render all preiously created ciphertext unreadable</span>
-<span class="pl-smi">mcrypt</span>.<span class="pl-en">configure</span>({
-  getSaltLen<span class="pl-k">:</span> <span class="pl-c1">8</span>,
-  getAppKey<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>super-secret-app-key<span class="pl-pds">'</span></span>,
-  <span class="pl-en">getUserSalt</span>(<span class="pl-smi">id</span>, <span class="pl-smi">context</span>) {
-    <span class="pl-c">// search for the salt in the DB provided as context</span>
-
-    <span class="pl-k">return</span> <span class="pl-smi">context</span>.<span class="pl-en">findOne</span>(id).<span class="pl-smi">secretFields</span>.<span class="pl-smi">salt</span>;
-  },
-  getUserKeyLen<span class="pl-k">:</span> <span class="pl-c1">8</span>,
-  getRounds<span class="pl-k">:</span> <span class="pl-c1">500</span>,
-  getDigest<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>sha256<span class="pl-pds">'</span></span>,
-  getAlgorithm<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>aes192<span class="pl-pds">'</span></span>, 
-  throwDecryptError<span class="pl-k">:</span> <span class="pl-c1">false</span>
-});
-
-
-<span class="pl-c">////// realistic use: ///////</span>
-
-<span class="pl-c">// create a real DB</span>
-<span class="pl-k">const</span> <span class="pl-c1">Users</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Mongo.Collection</span>(<span class="pl-s"><span class="pl-pds">'</span>test-users<span class="pl-pds">'</span></span>);
-
-<span class="pl-c">// reset it</span>
-<span class="pl-smi">Users</span>.<span class="pl-c1">remove</span>({});
-
-<span class="pl-c">// add two users to it</span>
-<span class="pl-smi">Users</span>.<span class="pl-en">insert</span>({
-  _id<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>A<span class="pl-pds">'</span></span>, 
-  name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Anna<span class="pl-pds">'</span></span>, 
-  secretFields<span class="pl-k">:</span> {
-    salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()
-  }
-});
-<span class="pl-smi">Users</span>.<span class="pl-en">insert</span>({
-  _id<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>B<span class="pl-pds">'</span></span>, 
-  name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Tom<span class="pl-pds">'</span></span>, 
-  secretFields<span class="pl-k">:</span> {
-    salt<span class="pl-k">:</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">generateSalt</span>()
-  }
-});
-
-cleartext  <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>And all the cake is gone.<span class="pl-pds">'</span></span>;
-<span class="pl-c">// if the salt is set to false, it will use the userId to get to the salt</span>
-ciphertext <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">encrypt</span>(cleartext, <span class="pl-s"><span class="pl-pds">'</span>A<span class="pl-pds">'</span></span>, <span class="pl-c1">false</span>, Users); <span class="pl-c">// &lt;- Annas ID</span>
-
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna encrypted '<span class="pl-s1"><span class="pl-pse">${</span>cleartext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
-
-clear2     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>B<span class="pl-pds">'</span></span>, <span class="pl-c1">false</span>, Users); <span class="pl-c">// &lt;- Toms ID</span>
-
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Tom decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>clear2<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);
-
-clear3     <span class="pl-k">=</span> <span class="pl-smi">mcrypt</span>.<span class="pl-en">decrypt</span>(ciphertext, <span class="pl-s"><span class="pl-pds">'</span>A<span class="pl-pds">'</span></span>, <span class="pl-c1">false</span>, Users); <span class="pl-c">// &lt;- Annas ID</span>
-
-<span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">`</span>Anna decrypted '<span class="pl-s1"><span class="pl-pse">${</span>ciphertext<span class="pl-pse">}</span></span>' to '<span class="pl-s1"><span class="pl-pse">${</span>clear3<span class="pl-pse">}</span></span>'<span class="pl-pds">`</span></span>);</pre></div>
+<p>for more check <code>mcrypt-test.js</code>.</p>
 
 <h3>
 <a id="tests" class="anchor" href="#tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tests</h3>
