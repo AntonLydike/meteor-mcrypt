@@ -1,5 +1,17 @@
 # Meteor mcrypt
-## What is this?
+### Table of contents:
+  1. [What is this](#what-is-this)
+  2. [API](#api)
+      1. [configure(settings)](#configuresettings)
+      2. [encrypt(cleartext, userId, [salt, [context]])](#encryptcleartext-userid-salt-context)
+      3. [decrypt(ciphertext, userId, [salt, [context]])](#decryptciphertext-userid-salt-context)
+      4. [generateSalt([length])](#generatesaltlength)
+      5. [McryptError(code, reason, [data])](#mcrypterrorcode-reason-data)
+  3. [Usage](#usage)
+  4. [Tests](#tests)
+  5. [License](#license)
+
+### What is this?
 Encrypt important data in your DB for later use. This uses the [Node.js crypto][4] library.
 
 Each users data will be encrypted with a seperate key to make decryption harder in case of a data breach. The user-specific key (user-key) is derived from the application-key (app-key) plus a user-specific salt per PBKDF2.
@@ -8,10 +20,10 @@ Each users data will be encrypted with a seperate key to make decryption harder 
 
 To install the package, run: `meteor add antonly:mcrypt`.
 
-## API
+### API
 Import it like this: `import mcrypt from 'meteor/antonly:mcrypt'`.
 
-### configure(settings)
+#### configure(settings)
 Configure the package to exactly fit your needs
 
 **default settings:**
@@ -25,7 +37,7 @@ mcrypt.configure({
       throw new DecryptError(
         'no-salt-given', 
         `Salt for user with id '${userId}' was not found in the db.`, 
-        context
+        {userId, context}
       );
     }
 
@@ -101,7 +113,7 @@ mcrypt.configure({
 ````
 (notice how you can pass functions or values)
 
-### encrypt(cleartext, userId, [salt, [context]])
+#### encrypt(cleartext, userId, [salt, [context]])
 Encrypts the given cleartext. 
   * `cleartext` The utf-8 string to encrypt
   * `userId` the ID of the user who's salt will be used
@@ -124,7 +136,7 @@ const ciphertext2 = mcrypt.encrypt(cleartext, 0, salt);
 // the userId can be set to any arbitrary value because the salt is provided
 ````
 
-### decrypt(ciphertext, userId, [salt, [context]])
+#### decrypt(ciphertext, userId, [salt, [context]])
 Decrypts given ciphertext.
   * `ciphertext` the text to decrypt
   * `userId` same thing as before, either you specify a userId or a salt
@@ -147,10 +159,10 @@ McryptError {
 ````
 `data.error` contains the catched error.
 
-### generateSalt([length])
+#### generateSalt([length])
 Generates a random salt using `crypto.randomBytes`. If you don't specify a length (in bytes) it will use the result of `getSaltLen()`.
 
-### McryptError(code, reason, [data])
+#### McryptError(code, reason, [data])
 An error object. It has the following fields:
   * `code` The error code (for example `'no-salt-given'`)
   * `reason` a more in-depth explanation of what went wrong
@@ -176,7 +188,7 @@ McryptError {
 It also has a custom `toString` method, wich will return `[McryptError this.code]`. In this case it would be `[McryptError no-salt-given]`.
 
 
-## usage
+### usage
 This is the `mcrypt-tests.js` code modified slightly.
 
 ````js
@@ -239,10 +251,10 @@ console.log(`Anna decrypted '${ciphertext}' to '${annasClearText}'`);
 
 // changing the settings will render all preiously created ciphertext unreadable
 mcrypt.configure({
-	getSaltLen: 8,
-	getAppKey: 'super-secret-app-key',
-	getUserSalt(id, context) {
-		// search for the salt in the DB provided as context
+  getSaltLen: 8,
+  getAppKey: 'super-secret-app-key',
+  getUserSalt(id, context) {
+    // search for the salt in the DB provided as context
 
     return context.findOne(id).secretFields.salt;
   },
@@ -264,18 +276,18 @@ Users.remove({});
 
 // add two users to it
 Users.insert({
-	_id: 'A', 
-	name: 'Anna', 
-	secretFields: {
-		salt: mcrypt.generateSalt()
-	}
+  _id: 'A', 
+  name: 'Anna', 
+  secretFields: {
+    salt: mcrypt.generateSalt()
+  }
 });
 Users.insert({
-	_id: 'B', 
-	name: 'Tom', 
-	secretFields: {
-		salt: mcrypt.generateSalt()
-	}
+  _id: 'B', 
+  name: 'Tom', 
+  secretFields: {
+    salt: mcrypt.generateSalt()
+  }
 });
 
 cleartext  = 'And all the cake is gone.';
@@ -293,6 +305,18 @@ clear3     = mcrypt.decrypt(ciphertext, 'A', false, Users); // <- Annas ID
 console.log(`Anna decrypted '${ciphertext}' to '${clear3}'`);
 ````
 
+### Tests
+There are a couple of TinyTest tests. To run them:
+
+  1. Install TinyTest: `meteor add tinytest`
+  2. Run Meteor in test mode `meteor test-packages`
+  3. Navigate to `http://localhost:3000`
+  4. Hopefully see all tests passing:
+
+![http://i.imgur.com/CSaulpQ.png](http://i.imgur.com/CSaulpQ.png)
+
+### License
+The code for this package is licensed under the [MIT License](http://opensource.org/licenses/MIT).
 
    [1]: http://security.stackexchange.com/a/3993
    [2]: https://nodejs.org/api/crypto.html#crypto_crypto_pbkdf2sync_password_salt_iterations_keylen_digest

@@ -121,9 +121,6 @@ Tinytest.add('Encrypt with DB', (test) => {
 
   console.log(`Tom decrypted '${ciphertext}' to '${clear2}'`);
 
-  console.log(clear2);
-
-
   const clear3     = mcrypt.decrypt(ciphertext, 'A', false, Users); // <- Annas ID
 
   console.log(`Anna decrypted '${ciphertext}' to '${clear3}'`);
