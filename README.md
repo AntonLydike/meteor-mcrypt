@@ -25,7 +25,7 @@ mcrypt.configure({
       throw new DecryptError(
         'no-salt-given', 
         `Salt for user with id '${userId}' was not found in the db.`, 
-        context
+        {userId, context}
       );
     }
 
