@@ -49,9 +49,14 @@ mcrypt.decrypt = function (ciphertext, userId, salt = false, context = {}) {
     return decipher.update(ciphertext,'hex','utf8') + decipher.final('utf8');
   
   } catch (error) {
+    // check if error should be thrown
     if (settings.throwDecryptError(context)) {
+      // throw it if it wants to be thrown
+
       throw error;
     } else {
+      // or return a more civilized error
+
       return new mcrypt.Error(
         'bad-decrypt', 
         'The ciphertext couldn\'t be decrypted with the given key', 
@@ -120,25 +125,25 @@ mcrypt.configure({
     return usr.secret_key_storage.salt;
   },
   getAppKey(context)  {
-    return Meteor.settings.ENCRYPT_PASSW_ENCRYPTION_KEY;
+    return Meteor.settings.MCRYPT_PASSW_ENCRYPTION_KEY;
   },
   getUserKeyLen(context)  {
-    return Meteor.settings.ENCRYPT_PASSW_USER_KEY_LENGTH;
+    return Meteor.settings.MCRYPT_PASSW_USER_KEY_LENGTH;
   },
   getRounds(context)  {
-    return Meteor.settings.ENCRYPT_PBKDF2_ROUNDS;
+    return Meteor.settings.MCRYPT_PBKDF2_ROUNDS;
   },
   getDigest(context)  {
-    return Meteor.settings.ENCRYPT_PBKDF2_DIGEST;
+    return Meteor.settings.MCRYPT_PBKDF2_DIGEST;
   },
   getAlgorithm(context)  {
-    return Meteor.settings.ENCRYPT_PASSW_ALGORITHM;
+    return Meteor.settings.MCRYPT_PASSW_ALGORITHM;
   },
   throwDecryptError(context) {
-    return Meteor.settings.ENCRYPT_THROW_DECRYPT_ERR;
+    return Meteor.settings.MCRYPT_THROW_DECRYPT_ERR;
   },
   getSaltLen()  {
-    return Meteor.settings.ENCRYPT_PASSW_SALT_LENGTH;
+    return Meteor.settings.MCRYPT_PASSW_SALT_LENGTH;
   }
 })
 

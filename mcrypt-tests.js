@@ -9,7 +9,7 @@ const persons = {
 }
 
 // DB for test #4
-const Users = new Mongo.Collection('test-users');
+const Users = new Mongo.Collection('TestUsers');
 
 // reset db
 Users.remove({});

@@ -1,4 +1,4 @@
-# Meteor mcrypt [(atmospherejs.com)](https://atmospherejs.com/antonly/mcrypt)
+# Meteor mcrypt
 ### Table of contents:
   1. [What is this](#what-is-this)
   2. [API](#api)
@@ -44,25 +44,25 @@ mcrypt.configure({
     return usr.secret_key_storage.salt;
   },
   getAppKey(context)  {
-    return Meteor.settings.ENCRYPT_PASSW_ENCRYPTION_KEY;
+    return Meteor.settings.MCRYPT_PASSW_ENCRYPTION_KEY;
   },
   getUserKeyLen(context)  {
-    return Meteor.settings.ENCRYPT_PASSW_USER_KEY_LENGTH;
+    return Meteor.settings.MCRYPT_PASSW_USER_KEY_LENGTH;
   },
   getRounds(context)  {
-    return Meteor.settings.ENCRYPT_PBKDF2_ROUNDS;
+    return Meteor.settings.MCRYPT_PBKDF2_ROUNDS;
   },
   getDigest(context)  {
-    return Meteor.settings.ENCRYPT_PBKDF2_DIGEST;
+    return Meteor.settings.MCRYPT_PBKDF2_DIGEST;
   },
   getAlgorithm(context)  {
-    return Meteor.settings.ENCRYPT_PASSW_ALGORITHM;
+    return Meteor.settings.MCRYPT_PASSW_ALGORITHM;
   },
   throwDecryptError(context) {
-    return Meteor.settings.ENCRYPT_THROW_DECRYPT_ERR;
+    return Meteor.settings.MCRYPT_THROW_DECRYPT_ERR;
   },
   getSaltLen()  {
-    return Meteor.settings.ENCRYPT_PASSW_SALT_LENGTH;
+    return Meteor.settings.MCRYPT_PASSW_SALT_LENGTH;
   }
 })
 ````
@@ -74,24 +74,24 @@ The `context` wil be passed along from a `decrypt` or `encrypt` call to all sett
 **settings.json:**
 ````JSON
 {
-  "ENCRYPT_PASSW_ENCRYPTION_KEY": "*some long encryption key*",
-  "ENCRYPT_PASSW_SALT_LENGTH": 32,
-  "ENCRYPT_PASSW_USER_KEY_LENGTH": 32,
-  "ENCRYPT_PBKDF2_ROUNDS": 100,
-  "ENCRYPT_PBKDF2_DIGEST": "sha512",
-  "ENCRYPT_PASSW_ALGORITHM": "aes-256-ctr",
-  "ENCRYPT_THROW_DECRYPT_ERR": false
+  "MCRYPT_PASSW_ENCRYPTION_KEY": "*some long encryption key*",
+  "MCRYPT_PASSW_SALT_LENGTH": 32,
+  "MCRYPT_PASSW_USER_KEY_LENGTH": 32,
+  "MCRYPT_PBKDF2_ROUNDS": 100,
+  "MCRYPT_PBKDF2_DIGEST": "sha512",
+  "MCRYPT_PASSW_ALGORITHM": "aes-256-ctr",
+  "MCRYPT_THROW_DECRYPT_ERR": false
 }
 ````
 In order to be able to use these settings in your meteor app, you will have to add the settings parameter to your `meteor` command: `meteor --settings development.json`
 
 **What each entry does:**
-  1. `ENCRYPT_PASSW_ENCRYPTION_KEY` Your secret key (aka. app-key). This key should be impossible to guess, so chose a big one.
-  2. `ENCRYPT_PASSW_SALT_LENGTH` The length (in bytes) of a standard 'salt' to derive the user-specific key
-  3. `ENCRYPT_PASSW_USER_KEY_LENGTH` The length (in bytes) of the key, derived from PBKDF2(app-key, salt) that is used to encrypt the data
-  4. `ENCRYPT_PBKDF2_ROUNDS` and `ENCRYPT_PBKDF2_DIGEST` correspond to their PBKDF2 parameters (more [here][2])
-  5. `ENCRYPT_PASSW_ALGORITHM` is the algorithm used to encrypt the data (the algorithm field of [crypto.createCipher][3])
-  6. `ENCRYPT_THROW_DECRYPT_ERR` Some algorithms will throw errors when trying to decipher with the wron key. If this is set to false, the error will be catched and an McryptError will be returned instead.
+  1. `MCRYPT_PASSW_ENCRYPTION_KEY` Your secret key (aka. app-key). This key should be impossible to guess, so chose a big one.
+  2. `MCRYPT_PASSW_SALT_LENGTH` The length (in bytes) of a standard 'salt' to derive the user-specific key
+  3. `MCRYPT_PASSW_USER_KEY_LENGTH` The length (in bytes) of the key, derived from PBKDF2(app-key, salt) that is used to encrypt the data
+  4. `MCRYPT_PBKDF2_ROUNDS` and `MCRYPT_PBKDF2_DIGEST` correspond to their PBKDF2 parameters (more [here][2])
+  5. `MCRYPT_PASSW_ALGORITHM` is the algorithm used to encrypt the data (the algorithm field of [crypto.createCipher][3])
+  6. `MCRYPT_THROW_DECRYPT_ERR` Some algorithms will throw errors when trying to decipher with the wron key. If this is set to false, the error will be catched and an McryptError will be returned instead.
 
 Sidenote: Of course you have to use your own parameters. These are just the development settings. You will have to choose your own parameters, depending on the importance of your data. (PBKDF2_ROUNDS should be chosen to fit your host system. I've read [somewhere][1] that a hash should take **at least** 241 milliseconds)
 
@@ -142,7 +142,7 @@ Decrypts given ciphertext.
   * `userId` same thing as before, either you specify a userId or a salt
   * `salt` and `context` see encrypt 
 
-This can return a `bad-decrypt` error when `ENCRYPT_THROW_DECRYPT_ERR` is set to true. The error will look like this:
+This can return a `bad-decrypt` error when `MCRYPT_THROW_DECRYPT_ERR` is set to true. The error will look like this:
 ````JS
 McryptError {
   _isError: true,
@@ -189,121 +189,82 @@ It also has a custom `toString` method, wich will return `[McryptError this.code
 
 
 ### usage
-This is the `mcrypt-tests.js` code modified slightly.
+This is how I (would) use this package. Your secret could be a user-specific API-key for example.
 
 ````js
 import mcrypt from 'meteor/antonly:mcrypt';
-import { Mongo } from 'meteor/mongo';
 
-let salt, cleartext, ciphertext, tomsCleartext, annasClearText, clear2, clear3;
-
-
-////// simple form: ///////
-
-// generate a salt
-salt       = mcrypt.generateSalt();
-cleartext  = 'The cake is a lie!';
-// userId is not used since the salt is given
-ciphertext = mcrypt.encrypt(cleartext, 0, salt); 
-
-console.log(`Encrypted '${cleartext}' to '${ciphertext}' with salt '${salt}'`);
-
-clear2     = mcrypt.decrypt(ciphertext, 0, salt);
-
-console.log(`Decrypted '${ciphertext}' to '${clear2}' with salt '${salt}'`);
-
-
-////// a little more advanced: ///////
-
-// substitution for a user DB
-const persons = {
-  'anna': {salt: mcrypt.generateSalt()},
-  'tom': {salt: mcrypt.generateSalt()}
-}
-
-// tell the encrypter where he can find the salts
+// point to the right field in the DB
 mcrypt.configure({
-  getUserSalt(user, context) {
-    return persons[user].salt;
+  getUserSalt(userId) {
+    const usr = Meteor.users.findOne(userId);
+
+    if (!usr || !usr.important || !usr.important.salt) {
+      throw new mcrypt.Error(
+        'no-salt-given',
+        `Salt for user with id '${userId}' was not found in the db.`,
+        {userId, context}
+      );
+    }
+
+    return usr.important.salt;
   }
+});
+
+// make sure each user has a salt
+Accounts.onCreateUser(function(options, user){
+  user.important = {
+    salt: mcrypt.generateSalt()
+  }
+
+  return user;
+});
+
+// implement methods to get and set secrets
+Meteor.methods({
+  setSecret(secret) {
+    check(secret, String);
+
+    if (!this.userId) return {success:false, error: 'login-required'};
+
+    const cipher = mcrypt.encrypt(secret, this.userId);
+
+    Meteor.users.update(this.userId, {
+      $set: {
+        'important.secret': cipher
+      }
+    });
+
+    return cipher;
+  },
+  getSecret() {
+    if (!this.userId) return {success:false, error: 'login-required'};
+
+    const cipher = Meteor.users.findOne(this.userId).important.secret;
+
+    const clear  = mcrypt.decrypt(cipher, this.userId);
+
+    return clear;
+  }
+});
+
+
+
+//// usage ////
+
+// on the client
+Meteor.call("setSecret", "secret", function (err, data) {
+  if (data && data.success !== false) alert(`Secret saved as "${data}"`);
 })
 
-// what anna does:
-cleartext      = 'I got a cake!';
-ciphertext     = mcrypt.encrypt(cleartext, 'anna');
-      
-// anna can now store the ciphertext anywhere she wants
 
-console.log(`Anna encrypted '${cleartext}' to '${ciphertext}'`);
-
-// what tom tries:
-tomsCleartext  = mcrypt.decrypt(ciphertext, 'tom');
-
-console.log(`Tom tried to decrypted '${ciphertext}' to '${tomsCleartext}'`);
-
-// and what anna decrypts again
-annasClearText = mcrypt.decrypt(ciphertext, 'anna');
-
-console.log(`Anna decrypted '${ciphertext}' to '${annasClearText}'`);
-
-
-////// a little more advanced: ///////
-
-// changing the settings will render all preiously created ciphertext unreadable
-mcrypt.configure({
-  getSaltLen: 8,
-  getAppKey: 'super-secret-app-key',
-  getUserSalt(id, context) {
-    // search for the salt in the DB provided as context
-
-    return context.findOne(id).secretFields.salt;
-  },
-  getUserKeyLen: 8,
-  getRounds: 500,
-  getDigest: 'sha256',
-  getAlgorithm: 'aes192', 
-  throwDecryptError: false
-});
-
-
-////// realistic use: ///////
-
-// create a real DB
-const Users = new Mongo.Collection('test-users');
-
-// reset it
-Users.remove({});
-
-// add two users to it
-Users.insert({
-  _id: 'A', 
-  name: 'Anna', 
-  secretFields: {
-    salt: mcrypt.generateSalt()
-  }
-});
-Users.insert({
-  _id: 'B', 
-  name: 'Tom', 
-  secretFields: {
-    salt: mcrypt.generateSalt()
-  }
-});
-
-cleartext  = 'And all the cake is gone.';
-// if the salt is set to false, it will use the userId to get to the salt
-ciphertext = mcrypt.encrypt(cleartext, 'A', false, Users); // <- Annas ID
-
-console.log(`Anna encrypted '${cleartext}' to '${ciphertext}'`);
-
-clear2     = mcrypt.decrypt(ciphertext, 'B', false, Users); // <- Toms ID
-
-console.log(`Tom decrypted '${ciphertext}' to '${clear2}'`);
-
-clear3     = mcrypt.decrypt(ciphertext, 'A', false, Users); // <- Annas ID
-
-console.log(`Anna decrypted '${ciphertext}' to '${clear3}'`);
+// later on
+Meteor.call("getSecret", function (err, data) {
+  if (!err) alert(`Secret retrieved as "${data}"`);
+})
 ````
+for more check `mcrypt-test.js`.
+
 
 ### Tests
 There are a couple of TinyTest tests. To run them:
