@@ -1,4 +1,4 @@
-# Meteor mcrypt
+# Meteor mcrypt [(atmospherejs.com)](https://atmospherejs.com/antonly/mcrypt)
 ### Table of contents:
   1. [What is this](#what-is-this)
   2. [API](#api)
