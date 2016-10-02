@@ -34,7 +34,7 @@ mcrypt.configure({
     const usr = Meteor.users.findOne(uid);
 
     if (!usr || !usr.secret_key_storage || !usr.secret_key_storage.salt) {
-      throw new DecryptError(
+      throw new mcrypt.Error(
         'no-salt-given', 
         `Salt for user with id '${userId}' was not found in the db.`, 
         {userId, context}
